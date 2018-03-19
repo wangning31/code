@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangmin.restfulservice.dao.UserLoginDao">
+
+ <select id="getUserInfo" resultType="com.zhangmin.restfulservice.domain.UserInfo" parameterType="map">
+        SELECT *
+        FROM t_login
+         where 1=1 
+            <if test="param.customerName !=null">
+                and customerName=#{param.customerName}
+            </if>
+            <if test="param.email !=null">
+                and email=#{param.email}
+            </if>
+            <if test="param.mobilePhone !=null">
+                and mobilePhone=#{param.mobilePhone}
+            </if>
+            <if test="param.passWord!=null">
+               and passWord=#{param.passWord}
+            </if>
+       
+     </select>
+  <select id="checkUser" resultType="com.zhangmin.restfulservice.domain.UserInfo" parameterType="string">
+        SELECT *
+        FROM t_login
+         where 1=1 
+            and customerId=#{customerId}
+       
+     </select>    
+     
+</mapper>

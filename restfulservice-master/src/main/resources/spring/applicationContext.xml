@@ -8,10 +8,10 @@
 
 	<import resource="datasource-config.xml" />
 	<import resource="quartz-task.xml" />
-	<import resource="quartz-time.xml" />
+<!-- 	<import resource="quartz-time.xml" /> -->
 
 	<!-- 自动扫描与装配bean，扫描web包，将带有注解的类纳入spring容器管理 -->
-	<context:component-scan base-package="com.daifaming" />
+	<context:component-scan base-package="com.zhangmin" />
 
 
 
@@ -29,19 +29,20 @@
 		p:dataSource-ref="dataSource" />
 
 	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"
-		p:basePackage="com.daifaming.restfulservice.dao"
+		p:basePackage="com.zhangmin.restfulservice.dao"
 		p:sqlSessionFactoryBeanName="sqlSessionFactory" />
 
 	<!-- 启用对事务注解的支持 -->
 	<tx:annotation-driven />
 
 	<!-- 配置调度工厂 -->
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+<!-- 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
 				<ref bean="testCronTrigger" />
 			</list>
 		</property>
-	</bean>
+	</bean> -->
+
 
 </beans>
