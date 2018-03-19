@@ -14,4 +14,8 @@ public interface UserLoginDao {
 	UserInfo getUserInfo(@Param("param") Map param);
 	
 	UserInfo checkUser(@Param("customerId") String customerId);
+	
+	UserInfo checkUseByCustomerName(@Param("customerName") String customerName);
+	
+	UserInfo checkUserByEmail(@Param("email") String email);
 }

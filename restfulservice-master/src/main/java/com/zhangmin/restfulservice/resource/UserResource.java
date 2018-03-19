@@ -21,10 +21,12 @@ import com.zhangmin.restfulservice.common.util.DateUtilService;
 import com.zhangmin.restfulservice.common.util.StringUtilService;
 import com.zhangmin.restfulservice.dao.UserLoginDao;
 import com.zhangmin.restfulservice.dao.UserLoginLogDao;
+import com.zhangmin.restfulservice.domain.PersonInfo;
 import com.zhangmin.restfulservice.domain.UserInfo;
 import com.zhangmin.restfulservice.domain.UserLoginLogInfo;
 import com.zhangmin.restfulservice.req.UserLoginOutReq;
 import com.zhangmin.restfulservice.req.UserLoginReq;
+import com.zhangmin.restfulservice.req.UserRegisterReq;
 import com.zhangmin.restfulservice.rsp.UserLoginRsp;  
 
 @Path("/user")
@@ -40,13 +42,6 @@ public class UserResource {
 	
 	private UserLoginLogDao userLoginLogDao;
 
-	@Autowired
-	
-	private StringUtilService stringUtilService;
-	
-	@Autowired
-	
-	private DateUtilService dateUtilService;
 	
 	
 	@SuppressWarnings("static-access")
@@ -58,7 +53,7 @@ public class UserResource {
 		
 		UserLoginRsp userLoginRsp = new UserLoginRsp();
 		Map<String, String> param = new HashMap<String, String>();
-		LOGGER.info("IP={}",stringUtilService.getIpAddr(request));
+		LOGGER.info("IP={}",StringUtilService.getIpAddr(request));
 		
 		if(StringUtils.isNullOrEmpty(user.getUserName()) ||StringUtils.isNullOrEmpty(user.getPassWord()))
 		{
@@ -67,9 +62,9 @@ public class UserResource {
 			
 			return userLoginRsp;
 		}
-		if (stringUtilService.validateEmail(user.getUserName())) {
+		if (StringUtilService.validateEmail(user.getUserName())) {
 			param.put("email", user.getUserName());
-		} else if (stringUtilService.validateMobile(user.getUserName())) {
+		} else if (StringUtilService.validateMobile(user.getUserName())) {
 			param.put("mobilePhone", user.getUserName());
 		} else {
 			param.put("customerName", user.getUserName());
@@ -87,9 +82,9 @@ public class UserResource {
 		//登录成功。添加登录成功日志
 		UserLoginLogInfo userLoginLogInfo=new UserLoginLogInfo();
 		userLoginLogInfo.setCustomerId(userInfo.getCustomerId());
-		userLoginLogInfo.setIPadress(stringUtilService.getIpAddr(request));
+		userLoginLogInfo.setIPadress(StringUtilService.getIpAddr(request));
 		userLoginLogInfo.setType(0);
-		userLoginLogInfo.setCreateTime(dateUtilService.getDateTime());
+		userLoginLogInfo.setCreateTime(DateUtilService.getDateTime());
 		userLoginLogDao.insert(userLoginLogInfo);
 		userLoginRsp.setRetCode("0");
 		userLoginRsp.setRetText("成功");
@@ -142,12 +137,85 @@ public class UserResource {
 		//退出登录
 		UserLoginLogInfo userLoginLogInfo=new UserLoginLogInfo();
 		userLoginLogInfo.setCustomerId(user.getCustomerId());
-		userLoginLogInfo.setIPadress(stringUtilService.getIpAddr(request));
+		userLoginLogInfo.setIPadress(StringUtilService.getIpAddr(request));
 		userLoginLogInfo.setType(1);
-		userLoginLogInfo.setCreateTime(dateUtilService.getDateTime());
+		userLoginLogInfo.setCreateTime(DateUtilService.getDateTime());
 		userLoginLogDao.insert(userLoginLogInfo);
 		commonRsp.setRetCode("0");
 		commonRsp.setRetText("成功");
+		return commonRsp;
+		
+		
+	}
+	
+	@SuppressWarnings("static-access")
+	@Path("/register")
+	@POST
+	@Produces( "application/json")
+	@Consumes("application/json")
+	public CommonRsp register(@Context HttpServletRequest request, UserRegisterReq req)
+	
+	{
+		
+		CommonRsp commonRsp=new CommonRsp();
+		
+		if (StringUtils.isNullOrEmpty(req.getCustomerName()) || StringUtils.isNullOrEmpty(req.getEmail())
+				|| StringUtils.isNullOrEmpty(req.getPassWord()) || StringUtils.isNullOrEmpty(req.getPassWordAgain())) {
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("参数为空");
+
+			return commonRsp;
+		}
+
+		if(!StringUtilService.validateNickname(req.getCustomerName()))
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("账号参数不合法");
+
+			return commonRsp;
+		}
+		if(!StringUtilService.validateEmail(req.getEmail()))
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("邮箱参数不合法");
+
+			return commonRsp;
+		}
+		if(!StringUtilService.validatePassword(req.getPassWord()))
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("密码参数不合法");
+
+			return commonRsp;
+		}
+		if(!req.getPassWord().equalsIgnoreCase(req.getPassWordAgain()))
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("两次密码不一致");
+
+			return commonRsp;
+		}
+		
+		UserInfo userInfo = new UserInfo();
+		userInfo = userLoginDao.checkUseByCustomerName(req.getCustomerName());
+		if(userInfo !=null)
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("用户名已经存在");
+			return commonRsp;
+		}
+		userInfo = userLoginDao.checkUserByEmail(req.getEmail());
+		if(userInfo !=null)
+		{
+			commonRsp.setRetCode("-1");
+			commonRsp.setRetText("邮箱已经注册");
+			return commonRsp;
+		}
+		
+		PersonInfo personInfo =new PersonInfo();
+		personInfo.setCustomerName(req.getCustomerName());
+	
+		personInfo.setEmail(req.getEmail());
 		return commonRsp;
 		
 		

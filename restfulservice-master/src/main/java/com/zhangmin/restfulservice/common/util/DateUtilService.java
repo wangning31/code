@@ -5,11 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.springframework.stereotype.Service;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
 
-@Service
-public class DateUtilService extends org.apache.commons.lang3.time.DateUtils  {
+
+public  abstract class DateUtilService extends org.apache.commons.lang3.time.DateUtils  {
 
 	private static String[] parsePatterns = {  
             "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",  
