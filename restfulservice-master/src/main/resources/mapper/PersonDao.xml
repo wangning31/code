@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangmin.restfulservice.dao.PersonDao">
+
+
+	<insert id="insert" parameterType="com.zhangmin.restfulservice.domain.PersonInfo"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_person
+		(customerId,customerName,mobilePhone,email,IdCard,name,sex,birthday,address,postcode,type,createTime,updateTime)
+		VALUES
+		(#{param.customerId},#{param.customerName},#{param.mobilePhone},#{param.email},#{param.IdCard},#{param.name},#{param.sex},#{param.birthday},#{param.address},#{param.postcode},#{param.type},#{param.createTime},#{param.updateTime});
+	</insert>    
+          
+     
+</mapper>

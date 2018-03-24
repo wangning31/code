@@ -19,6 +19,7 @@ import com.mysql.cj.core.util.StringUtils;
 import com.zhangmin.restfulservice.CommonRsp;
 import com.zhangmin.restfulservice.common.util.DateUtilService;
 import com.zhangmin.restfulservice.common.util.StringUtilService;
+import com.zhangmin.restfulservice.dao.PersonDao;
 import com.zhangmin.restfulservice.dao.UserLoginDao;
 import com.zhangmin.restfulservice.dao.UserLoginLogDao;
 import com.zhangmin.restfulservice.domain.PersonInfo;
@@ -42,7 +43,9 @@ public class UserResource {
 	
 	private UserLoginLogDao userLoginLogDao;
 
+	@Autowired
 	
+	private PersonDao personDao;
 	
 	@SuppressWarnings("static-access")
 	@Path("/login-in")
@@ -211,11 +214,33 @@ public class UserResource {
 			commonRsp.setRetText("邮箱已经注册");
 			return commonRsp;
 		}
-		
+		//录入登录信息
+		UserInfo register = new UserInfo();
+		register.setCreateTime(DateUtilService.getDateTime());
+		register.setCustomerName(req.getCustomerName());
+		register.setCustomerId(StringUtilService.getUUID());
+		register.setEmail(req.getEmail());
+		register.setMobilePhone(null);
+		register.setPassWord(req.getPassWord());
+		register.setStatus(0);
+		register.setType(0);
+		register.setUpdateTime(register.getCreateTime());
+		userLoginDao.insert(register);
+		//录入个人基本信息
 		PersonInfo personInfo =new PersonInfo();
 		personInfo.setCustomerName(req.getCustomerName());
-	
+		personInfo.setCreateTime(register.getCreateTime());
+		personInfo.setCustomerId(register.getCustomerId());
+		personInfo.setCustomerName(register.getCustomerName());
+		personInfo.setEmail(register.getEmail());
+		personInfo.setType(0);
+		personInfo.setSex(0);
+		personInfo.setUpdateTime(register.getCreateTime());
 		personInfo.setEmail(req.getEmail());
+	
+		personDao.insert(personInfo);
+		commonRsp.setRetCode("0");
+		commonRsp.setRetText("用户注册成功");
 		return commonRsp;
 		
 		

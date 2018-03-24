@@ -42,7 +42,15 @@
          where 1=1 
             and email=#{email}
        
-     </select>     
+     </select> 
+     
+     	<insert id="insert"
+		parameterType="com.zhangmin.restfulservice.domain.UserInfo"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_login (customerId,customerName,mobilePhone,email,passWord,type,status,createTime,updateTime)
+		VALUES
+		(#{param.customerId},#{param.customerName},#{param.mobilePhone},#{param.email},#{param.passWord},#{param.type},#{param.status},#{param.createTime},#{param.updateTime});
+	</insert>    
           
      
 </mapper>

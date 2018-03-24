@@ -243,8 +243,8 @@ public  abstract class StringUtilService {
      * @return uuid串
      */
     public static String getUUID() {
-        String uuid = UUID.randomUUID().toString().trim().replaceAll("-", "");
-        return uuid.toUpperCase();
+        String uuid = UUID.randomUUID().toString();
+        return uuid;
     }
 
 
