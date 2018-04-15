@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhangmin.restfulservice.dao.ResbillTempDao">
+
+	<sql id="allCloumns">
+
+		`customerId`,
+
+		`beId`,
+
+		`consumeTime`,
+
+		`resourceId`,
+		
+		`consumeAmount`,
+
+		`measuerId`,
+
+		`cloudServiceTypeCode`,
+
+		`balanceTypeDebit`,
+
+		`balanceTypeBonus`,
+
+		`balanceTypeCoupon`
+
+	</sql>
+
+	<select id="query"
+		resultType="com.zhangmin.restfulservice.dao.entry.MonthRecordEntry"
+		parameterType="map">
+
+		select
+		customerId,beId,consumeTime,measuerId,resourceId,cloudServiceTypeCode,sum(consumeAmount)
+		as consumeAmount,sum(IFNULL(balanceTypeDebit,0)) as
+		balanceTypeDebit,sum(IFNULL(balanceTypeBonus,0)) as
+		balanceTypeBonus,sum(IFNULL(balanceTypeCoupon,0)) as balanceTypeCoupon
+		from
+		t_query_resbill_temp
+		where 1=1
+		<if test="param.customerId !=null">
+			and customerId=#{param.customerId}
+		</if>
+		<if test="param.beId !=null">
+			and beId=#{param.beId}
+		</if>
+		<if test="param.consumeTime !=null">
+			and consumeTime=#{param.consumeTime}
+		</if>
+		<if test="param.resourceId !=null">
+			and resourceId=#{param.resourceId}
+		</if>
+		<if test="param.cloudServiceTypeCode !=null">
+			and cloudServiceTypeCode=#{param.cloudServiceTypeCode}
+		</if>
+		<if test="param.insertTime !=null">
+			and insertTime=#{param.insertTime}
+		</if>
+		group by customerId,beId,consumeTime,resourceId,cloudServiceTypeCode
+	</select>
+	
+		<select id="count"
+		resultType="Integer"
+		parameterType="map">
+
+		select
+        count(1)
+		from
+		t_query_resbill_temp
+		where 1=1
+		<if test="param.customerId !=null">
+			and customerId=#{param.customerId}
+		</if>
+		<if test="param.beId !=null">
+			and beId=#{param.beId}
+		</if>
+		<if test="param.consumeTime !=null">
+			and consumeTime=#{param.consumeTime}
+		</if>
+		<if test="param.resourceId !=null">
+			and resourceId=#{param.resourceId}
+		</if>
+		<if test="param.cloudServiceTypeCode !=null">
+			and cloudServiceTypeCode=#{param.cloudServiceTypeCode}
+		</if>
+		<if test="param.insertTime !=null">
+			and insertTime=#{param.insertTime}
+		</if>
+	</select>
+
+ 
+</mapper>

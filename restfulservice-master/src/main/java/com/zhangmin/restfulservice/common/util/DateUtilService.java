@@ -181,4 +181,19 @@ public  abstract class DateUtilService extends org.apache.commons.lang3.time.Dat
         String first = format.format(c.getTime());  
         return first;  
     }  
+    /**
+     * 
+     * 
+     * 获取昨天的日期
+     * 
+            * @return
+            * @Description:
+     */
+    public static String getYesterDay()
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        Date time = cal.getTime();
+        return new SimpleDateFormat("yyyy-MM-dd").format(time);
+    }
 }

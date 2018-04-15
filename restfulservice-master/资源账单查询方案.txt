@@ -1,0 +1,152 @@
+﻿
+
+假设当天是4月1日,即当月的第一天。这时候查询资源账单有两种场景：
+       
+	   4月1日查询时3月的账单可能已经计算完成，也可能未计算完成，分两个场景，该两个场景都从临时表查询
+  
+  1 查询3月份的资源账单
+  
+  
+     (1)若4月1日的资源账单计算任务已经计算完成，即3月份整个月份的数据已经计算完成，不需要再查询本地，直接查询临时表的数据 consumetime='2018-03',inserTime='2018-04-01'
+  
+  
+     (2)若4月1日的资源账单计算任务尚未完成，即3月1号至3月30号的资源账单计算完成，缺少3月31日的资源账单数据，查询要查两个表：临时表和mpp表
+	    
+		查询临时表时consumetime='2018-03',inserTime='2018-03-31'
+		
+		查询mmp表consumeday='2018-03-31',calcount取最大值。此场景下mpp表只查询1天的数据
+		
+		然后将两个查询结果汇总一起。由于临时表是按月汇总的，mpp表是按天汇总，需要加mpp的数据累加到临时表而不是直接追加
+		  方案：将两个结果组装成两个map:map1,map2 key为资源信息的联合key
+		  新建一个list
+		        遍历map1,如果map2存在一样的key值,将两个结果汇总存入到list中，map2可以移除此key值，
+				         如果map2不存在一样的key值，将map1的value存入到list中
+				循环遍历完成后，如果map2人存在值，将map2的value转化存入到list中		 
+		  
+		
+  
+  2 查询4月份的资源账单
+  
+     1)此时无论4月1日的计算结果有没有计算完成，临时表都不会存在4月份的资源账单。当然也可以去查临时表，只是结果为空
+	
+	 2)查询mpp表consumeday='2018-04-01',calcount取最大值。此场景下mpp表只查询1天的数据
+	 
+	 汇总结果方案可以参考上面
+	 
+	 
+	 
+	 
+	 
+假设当天不是4月1日，即不是当月的第一天
+
+  1 查询3月份的数据(历史月份数据)，直接查询正式表
+
+
+  2 查询4月份的数据 假设查询当天日志为4月3号
+  
+     方案1:4月3号查询，4月2日的计算任务已经完成，即4月2号版本的数据已经存在，此时计算的结果4月1号当天的数据
+	       
+		   mpp表需要查询最近2天的数据即4月2号,4月3号的数据。这两天的数据可能要分两次查询，暂时没有想到好的sql语句可以一次性查询2天的数据
+
+            
+	方案2:4月3号查询，判断临时表是否已经存在4月3号的版本，即4月1号至4月2号的版本。如果存在mpp只查询4月3号的数据
+          若不存在，则需要查询最近2天的数据，即	即4月2号,4月3号的数据。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT
+  *
+FROM
+  (SELECT
+    *
+  FROM
+    t_query_resbill_mpp t
+  WHERE t.`customerId` = 'wangning'
+    AND t.`beId` = '0'
+    AND t.`consumeTime` IN ('2018-04-14', '2018-04-15')
+  ORDER BY t.`consumeTime` DESC,
+    t.`calCount` DESC) t
+GROUP BY customerId,
+  beId,
+  consumeTime,
+  resourceId,
+  cloudServiceTypeCode,
+  consumeTime
+ORDER BY t.`consumeTime` DESC,
+  t.`calCount` DESC
+
+
+
+
+
+
+、、、
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+SQLyog  v12.2.6 (64 bit)
+MySQL - 5.5.28 
+*********************************************************************
+*/
+/*!40101 SET NAMES utf8 */;
+
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('1','wangning','0','2018-04-14','resourceId1','cloudServiceTypeCode1','3','6','1','2','3','1');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('2','wangning','0','2018-04-14','resourceId1','cloudServiceTypeCode1','3','8','2','3','3','24');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('3','wangning','0','2018-04-15','resourceId1','cloudServiceTypeCode1','3','3','1','1','0','2');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('4','wangning','0','2018-04-15','resourceId1','cloudServiceTypeCode1','3','15','5','5','5','16');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('5','wangning','0','2018-04-14','resourceId2','cloudServiceTypeCode2','3','10','1','2','7','1');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('5','wangning','0','2018-04-14','resourceId2','cloudServiceTypeCode2','3','19','8','9','2','24');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('7','wangning','0','2018-04-15','resourceId2','cloudServiceTypeCode2','3','5','1','1','3','2');
+insert into `t` (`id`, `customerId`, `beId`, `consumeTime`, `resourceId`, `cloudServiceTypeCode`, `measuerId`, `consumeAmount`, `balanceTypeDebit`, `balanceTypeBonus`, `balanceTypeCoupon`, `calCount`) values('8','wangning','0','2018-04-15','resourceId2','cloudServiceTypeCode2','3','9','3','3','3','16');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
